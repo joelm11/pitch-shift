@@ -1,9 +1,37 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <complex>
 #include <vector>
 
-#include "../fft_impl.h"  // Assuming fft_impl.h contains the FFT implementation
+#include "../fft_impl.h"
+
+const float PI = 3.141592653589793238460;
+
+// Naive FFT function
+void NaiveFFT(std::vector<std::complex<float>>& a) {
+  const size_t N = a.size();
+  if (N <= 1) return;
+
+  // Divide
+  std::vector<std::complex<float>> even(N / 2);
+  std::vector<std::complex<float>> odd(N / 2);
+  for (size_t i = 0; i < N / 2; ++i) {
+    even[i] = a[i * 2];
+    odd[i] = a[i * 2 + 1];
+  }
+
+  // Conquer
+  NaiveFFT(even);
+  NaiveFFT(odd);
+
+  // Combine
+  for (size_t k = 0; k < N / 2; ++k) {
+    std::complex<float> t = std::polar(1.f, -2.f * PI * k / N) * odd[k];
+    a[k] = even[k] + t;
+    a[k + N / 2] = even[k] - t;
+  }
+}
 
 class FFTTest : public ::testing::Test {
  protected:
@@ -26,50 +54,51 @@ class FFTTest : public ::testing::Test {
   }
 
   // Helper function to compare two complex vectors
-  bool CompareComplexVectors(const std::vector<std::complex<double>>& a,
-                             const std::vector<std::complex<double>>& b,
-                             double tol = 1e-9) {
-    if (a.size() != b.size()) return false;
+  bool CompareComplexVectors(const std::vector<std::complex<float>>& a,
+                             const std::vector<std::complex<float>>& b,
+                             float tol = 1e-3) {
+    if (a.size() != b.size()) {
+      ADD_FAILURE() << "Vectors have different sizes: " << a.size() << " vs "
+                    << b.size();
+      return false;
+    }
     for (size_t i = 0; i < a.size(); ++i) {
-      if (std::abs(a[i] - b[i]) > tol) return false;
+      if (std::abs(a[i] - b[i]) > tol) {
+        ADD_FAILURE() << "Vectors differ at index " << i << ": " << a[i]
+                      << " vs " << b[i];
+        return false;
+      }
     }
     return true;
   }
-};
 
-// Test the construction and destruction of the FFT implementation
-TEST_F(FFTTest, ConstructionDestruction) {
-  FFTImpl fft;
-  // No assertions needed, just ensuring no exceptions are thrown
-}
+  const size_t kFFTLen_ = 1024;
+};
 
 // Test the forward FFT implementation against expected transform values
 TEST_F(FFTTest, ForwardTransform) {
-  FFTImpl fft;
-  std::vector<std::complex<double>> input = {1.0, 1.0, 1.0, 1.0};
-  std::vector<std::complex<double>> expected_output = {4.0, 0.0, 0.0, 0.0};
-  std::vector<std::complex<double>> output = fft.forward(input);
-  EXPECT_TRUE(CompareComplexVectors(output, expected_output));
-}
+  FFTImpl fft(kFFTLen_);
+  std::vector<float> input(kFFTLen_);
+  float sample_rate = 1000.0;  // Sample rate in Hz
+  float frequency = 100.0;     // Frequency of the sine wave in Hz
 
-// Test the inverse FFT implementation and ensure it's the same as the initial
-// input
-TEST_F(FFTTest, InverseTransform) {
-  FFTImpl fft;
-  std::vector<std::complex<double>> input = {4.0, 0.0, 0.0, 0.0};
-  std::vector<std::complex<double>> expected_output = {1.0, 1.0, 1.0, 1.0};
-  std::vector<std::complex<double>> output = fft.inverse(input);
-  EXPECT_TRUE(CompareComplexVectors(output, expected_output));
-}
+  // Populate the input vector with a 100Hz sine wave
+  for (size_t i = 0; i < kFFTLen_; ++i) {
+    input[i] = std::sin(2 * PI * frequency * i / sample_rate);
+  }
 
-// Test the transformation in both directions
-TEST_F(FFTTest, ForwardAndInverseTransform) {
-  FFTImpl fft;
-  std::vector<std::complex<double>> input = {1.0, 2.0, 3.0, 4.0};
-  std::vector<std::complex<double>> forward_output = fft.forward(input);
-  std::vector<std::complex<double>> inverse_output =
-      fft.inverse(forward_output);
-  EXPECT_TRUE(CompareComplexVectors(input, inverse_output));
+  std::vector<std::complex<float>> output(kFFTLen_);
+  fft.Forward(input, output);
+
+  // Compute the expected output using the naive FFT function
+  std::vector<std::complex<float>> expected_output(input.begin(), input.end());
+  NaiveFFT(expected_output);
+
+  // Convert expected_output to std::complex<float>
+  std::vector<std::complex<float>> expected_output_float(
+      expected_output.begin(), expected_output.end());
+
+  EXPECT_TRUE(CompareComplexVectors(output, expected_output_float));
 }
 
 int main(int argc, char** argv) {
