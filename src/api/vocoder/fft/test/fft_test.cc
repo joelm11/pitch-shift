@@ -8,6 +8,42 @@
 
 const float PI = 3.141592653589793238460;
 
+// Helper function to compare two complex vectors
+bool CompareComplexVectors(const std::vector<std::complex<float>>& a,
+                           const std::vector<std::complex<float>>& b,
+                           float tol = 1e-3) {
+  if (a.size() != b.size()) {
+    ADD_FAILURE() << "Vectors have different sizes: " << a.size() << " vs "
+                  << b.size();
+    return false;
+  }
+  for (size_t i = 0; i < a.size(); ++i) {
+    if (std::abs(a[i] - b[i]) > tol) {
+      ADD_FAILURE() << "Vectors differ at index " << i << ": " << a[i] << " vs "
+                    << b[i];
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CompareRealVectors(const std::vector<float>& a,
+                        const std::vector<float>& b, float tol = 1e-5) {
+  if (a.size() != b.size()) {
+    ADD_FAILURE() << "Vectors have different sizes: " << a.size() << " vs "
+                  << b.size();
+    return false;
+  }
+  for (size_t i = 0; i < a.size(); ++i) {
+    if (std::abs(a[i] - b[i]) > tol) {
+      ADD_FAILURE() << "Vectors differ at index " << i << ": " << a[i] << " vs "
+                    << b[i];
+      return false;
+    }
+  }
+  return true;
+}
+
 // Naive FFT function
 void NaiveFFT(std::vector<std::complex<float>>& a) {
   const size_t N = a.size();
@@ -35,49 +71,17 @@ void NaiveFFT(std::vector<std::complex<float>>& a) {
 
 class FFTTest : public ::testing::Test {
  protected:
-  FFTTest() {
-    // Initialization code here
-  }
-
-  ~FFTTest() override {
-    // Cleanup code here
-  }
-
-  void SetUp() override {
-    // Code here will be called immediately after the constructor (right before
-    // each test).
-  }
-
-  void TearDown() override {
-    // Code here will be called immediately after each test (right before the
-    // destructor).
-  }
-
-  // Helper function to compare two complex vectors
-  bool CompareComplexVectors(const std::vector<std::complex<float>>& a,
-                             const std::vector<std::complex<float>>& b,
-                             float tol = 1e-3) {
-    if (a.size() != b.size()) {
-      ADD_FAILURE() << "Vectors have different sizes: " << a.size() << " vs "
-                    << b.size();
-      return false;
-    }
-    for (size_t i = 0; i < a.size(); ++i) {
-      if (std::abs(a[i] - b[i]) > tol) {
-        ADD_FAILURE() << "Vectors differ at index " << i << ": " << a[i]
-                      << " vs " << b[i];
-        return false;
-      }
-    }
-    return true;
-  }
+  FFTTest() : fft(kFFTLen_) {}
 
   const size_t kFFTLen_ = 1024;
+  FFTImpl fft;
 };
+
+// Test basic instantiation/deinitialization of the FFT implementation.
+TEST_F(FFTTest, Instantiation) {}
 
 // Test the forward FFT implementation against expected transform values
 TEST_F(FFTTest, ForwardTransform) {
-  FFTImpl fft(kFFTLen_);
   std::vector<float> input(kFFTLen_);
   float sample_rate = 1000.0;  // Sample rate in Hz
   float frequency = 100.0;     // Frequency of the sine wave in Hz
@@ -101,7 +105,28 @@ TEST_F(FFTTest, ForwardTransform) {
   EXPECT_TRUE(CompareComplexVectors(output, expected_output_float));
 }
 
-int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+// Test the inverse FFT implementation against expected transform values
+TEST_F(FFTTest, InverseTransform) {
+  std::vector<float> input(kFFTLen_);
+  float sample_rate = 1000.0;  // Sample rate in Hz
+  float frequency = 100.0;     // Frequency of the sine wave in Hz
+
+  // Populate the input vector with a 100Hz sine wave
+  for (size_t i = 0; i < kFFTLen_; ++i) {
+    input[i] = std::sin(2 * PI * frequency * i / sample_rate);
+  }
+
+  std::vector<std::complex<float>> output(kFFTLen_);
+  fft.Forward(input, output);
+
+  std::vector<float> inverse_output(kFFTLen_);
+  fft.Inverse(output, inverse_output);
+
+  // Normalize the inverse output
+  for (size_t i = 0; i < kFFTLen_; ++i) {
+    inverse_output[i] /= kFFTLen_;
+  }
+
+  // Compare the inverse output with the original input
+  EXPECT_TRUE(CompareRealVectors(inverse_output, input));
 }
