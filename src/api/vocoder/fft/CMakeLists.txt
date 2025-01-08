@@ -1,7 +1,6 @@
-add_library(fft INTERFACE fft_base.h fft_pffft.h)
+add_library(fft_impl INTERFACE fft_base.h fft_impl.h)
 
-target_include_directories(fft INTERFACE ${PRETTY_FAST_FFT_SOURCE_DIR})
-target_link_libraries(fft INTERFACE pffft)
+target_link_libraries(fft_impl INTERFACE kissfft)
 
 if(DEBUG)
     add_subdirectory(test)

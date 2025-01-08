@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "fft/fft_pffft.h"
+#include "fft/fft_impl.h"
 
 class Vocoder {
  public:
@@ -31,7 +31,7 @@ class Vocoder {
   FBuffer input_buffer_, output_buffer_, window_buffer_, fft_input_buffer_,
       prev_phase_, prev_synth_phase_;
   CFBuffer fft_output_buffer_;
-  std::unique_ptr<PFFFT<float>> fft_impl_;
+  //   std::unique_ptr<PFFFT<float>> fft_impl_;
   SizeType analysis_hop_size_;
 };
 

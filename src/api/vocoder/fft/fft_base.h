@@ -12,6 +12,7 @@ class FFTBase {
 
   virtual void Forward(const std::vector<T>& input,
                        std::vector<std::complex<T>>& output) = 0;
+
   virtual void Inverse(const std::vector<std::complex<T>>& input,
                        std::vector<T>& output) = 0;
 };

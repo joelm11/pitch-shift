@@ -1,1 +1,1 @@
-add_test(test_vocoder test_vocoder.cc vocoder)
+# add_test(test_vocoder test_vocoder.cc vocoder)

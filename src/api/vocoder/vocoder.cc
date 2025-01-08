@@ -6,8 +6,9 @@ Vocoder::Vocoder(const SizeType num_channels, const SizeType num_samples,
                  const SizeType sample_rate)
     : kNumChannels_(num_channels),
       kNumSamples_(num_samples),
-      kSampleRate_(sample_rate),
-      fft_impl_(std::make_unique<PFFFT<float>>(num_samples)) {
+      kSampleRate_(sample_rate)
+// fft_impl_(std::make_unique<PFFFT<float>>(num_samples))
+{
   ResizeBuffers(num_channels, num_samples);
   InitFFT(num_samples);
   // Calculate constants based on scale factor.
@@ -37,7 +38,7 @@ void Vocoder::Analysis() {
   }
   // FFT
   for (int i = 0; i < kNumChannels_; ++i) {
-    fft_impl_->Forward(input_buffer_[i], fft_output_buffer_[i]);
+    // fft_impl_->Forward(input_buffer_[i], fft_output_buffer_[i]);
   }
   // Convert FFT result to magnitude and phase format.
 }
@@ -56,5 +57,5 @@ void Vocoder::ResizeBuffers(const SizeType num_channels,
 };
 
 void Vocoder::InitFFT(const SizeType num_samples) {
-  fft_impl_ = std::make_unique<PFFFT<float>>(num_samples);
+  // fft_impl_ = std::make_unique<PFFFT<float>>(num_samples);
 }

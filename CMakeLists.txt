@@ -32,6 +32,7 @@ else()
     # Additional release flags here...
 endif()
 
+add_subdirectory(src/external)
 add_subdirectory(src/api)
 
 # Conditionally build CLI.
