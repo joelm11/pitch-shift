@@ -1,0 +1,1 @@
+add_test(pitch_shift_api_test pitch_shift_api_test.cc "pitch-shift-api")

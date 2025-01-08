@@ -1,0 +1,1 @@
+add_test(test_fft fft_pffft_test.cc fft pffft)
