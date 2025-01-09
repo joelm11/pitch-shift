@@ -1,4 +1,4 @@
-#include "vocoder.h"
+#include "../vocoder.h"
 
 #include <gtest/gtest.h>
 
