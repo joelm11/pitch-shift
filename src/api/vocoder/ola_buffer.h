@@ -26,13 +26,6 @@ class OLABuffer {
     }
     index_ += kHopSize_;
 
-    std::cout << "Added\n";
-    for (const auto item : buffer_) {
-      std::cout << item << " ";
-    }
-    std ::cout << " | " << index_ << " | ";
-    std::cout << std::endl;
-
     // Copy the output frame from the buffer.
     const std::vector<float> kOutput(buffer_.begin(),
                                      buffer_.begin() + kWindowSize_);
@@ -41,26 +34,10 @@ class OLABuffer {
     // frame and should shift the buffer, clearing the portion of the buffer
     // that does not contain a partially completed frame.
     if (index_ >= kWindowSize_) {
-      // Instead of copy, use std::memmove.
-      // std::copy(buffer_.begin() + kHopSize_, buffer_.end(), buffer_.begin());
       std::memmove(buffer_.data(), buffer_.data() + kHopSize_,
                    (kBufferSize_ - kHopSize_) * sizeof(float));
-
-      std::cout << "Copied\n";
-      for (const auto item : buffer_) {
-        std::cout << item << " ";
-      }
-      std::cout << std::endl;
-
       std::fill(buffer_.end() - kHopSize_, buffer_.end(), 0.0f);
-
       index_ -= kHopSize_;
-
-      std::cout << "Filled\n";
-      for (const auto item : buffer_) {
-        std::cout << item << " ";
-      }
-      std::cout << std::endl;
     }
 
     return kOutput;
