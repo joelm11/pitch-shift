@@ -27,7 +27,6 @@ void Vocoder::Validate(const std::vector<std::vector<float>>& src,
   if (src.size() != kNumChannels_) {
     throw std::runtime_error("Vocoder: Channel count mismatch.");
   }
-
   // If the scale factor changes, update synthesis hop size.
   if (scale_factor != scale_factor_) {
     scale_factor_ = scale_factor;
@@ -36,7 +35,6 @@ void Vocoder::Validate(const std::vector<std::vector<float>>& src,
     olabuffers_ = std::vector<OLABuffer>(
         kNumChannels_, OLABuffer(kNumSamples_, synthesis_hop_size_));
   }
-
   // If the sample count changed, pad with zeros.
   if (src[0].size() < kNumSamples_) {
     for (int i = 0; i < kNumChannels_; ++i) {
