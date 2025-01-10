@@ -8,7 +8,7 @@
 
 class OLABuffer {
  public:
-  OLABuffer(size_t window_size, size_t hop_size)
+  OLABuffer(const size_t window_size, const size_t hop_size)
       : kWindowSize_(window_size),
         kHopSize_(hop_size),
         kBufferSize_(2 * window_size),

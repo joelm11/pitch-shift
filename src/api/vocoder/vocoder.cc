@@ -21,12 +21,10 @@ std::vector<std::vector<float>> Vocoder::Process(
   // Catch case where zero-padding is required.
 
   Analysis();
-
-  // ModifyPhaseR
-
+  ModifyPhaseR();
   // ModifyPhaseT
-  // Synthesis
-  return std::vector<std::vector<float>>();
+  Synthesis();
+  return output_buffer_;
 }
 
 void Vocoder::Analysis() {
@@ -57,6 +55,23 @@ void Vocoder::ModifyPhaseR() {
   }
 }
 
+void Vocoder::Synthesis() {
+  // Inverse FFT.
+  for (int i = 0; i < kNumChannels_; ++i) {
+    ffts_[i]->Inverse(fft_output_buffer_[i], output_buffer_[i]);
+  }
+  // Apply window function.
+  for (int i = 0; i < kNumChannels_; ++i) {
+    for (int j = 0; j < kNumSamples_; ++j) {
+      output_buffer_[i][j] *= window_buffer_[0][j];
+    }
+  }
+  // Overlap-add.
+  for (int i = 0; i < kNumChannels_; ++i) {
+    output_buffer_[i] = olabuffers_[i].OverlapAdd(output_buffer_[i]);
+  }
+}
+
 void Vocoder::ResizeBuffers(const SizeType num_channels,
                             const SizeType num_samples) {
   // Initialize internal buffers.
@@ -68,11 +83,16 @@ void Vocoder::ResizeBuffers(const SizeType num_channels,
   fft_input_buffer_ = FBuffer(num_channels, std::vector<float>(num_samples));
   fft_output_buffer_ =
       CFBuffer(num_channels, std::vector<std::complex<float>>(num_samples));
+  const int kHopSize = 128;
+  olabuffers_ =
+      std::vector<OLABuffer>(num_channels, OLABuffer(num_samples, kHopSize));
 };
 
 void Vocoder::InitFFT(const SizeType num_channels, const SizeType num_samples) {
-  // Initialize FFTs.
+  // ffts_ = std::vector<std::unique_ptr<FFTImpl>>(
+  //     num_channels, std::make_unique<FFTImpl>(num_samples));
+  ffts_.clear();
   for (int i = 0; i < num_channels; ++i) {
-    ffts_[i] = std::make_unique<FFTImpl>(num_samples);
+    ffts_.push_back(std::make_unique<FFTImpl>(num_samples));
   }
 }

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "fft/fft_impl.h"
+#include "ola_buffer.h"
 
 class Vocoder {
  public:
@@ -31,6 +32,7 @@ class Vocoder {
   FBuffer input_buffer_, output_buffer_, window_buffer_, fft_input_buffer_,
       prev_phase_, prev_synth_phase_;
   CFBuffer fft_output_buffer_;
+  std::vector<OLABuffer> olabuffers_;
   // NOTE: Using a vector of 1D FFTs for simplicity.
   // TODO: Update to use a multidimensional FFT implementation later.
   std::vector<std::unique_ptr<FFTImpl>> ffts_;
