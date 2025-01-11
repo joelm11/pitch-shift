@@ -60,8 +60,9 @@ void Vocoder::Analysis() {
   // Convert FFT result to magnitude and phase format.
   for (int i = 0; i < kNumChannels_; ++i) {
     for (int j = 0; j < kNumSamples_; ++j) {
-      fft_output_buffer_[i][j] = std::polar(std::abs(fft_output_buffer_[i][j]),
-                                            std::arg(fft_output_buffer_[i][j]));
+      fft_output_buffer_[i][j] =
+          std::complex<float>(std::abs(fft_output_buffer_[i][j]),
+                              std::arg(fft_output_buffer_[i][j]));
     }
   }
 }
@@ -75,6 +76,14 @@ void Vocoder::ModifyPhaseR() {
 }
 
 void Vocoder::Synthesis() {
+  // Convert magnitude and phase back to complex format.
+  for (int i = 0; i < kNumChannels_; ++i) {
+    for (int j = 0; j < kNumSamples_; ++j) {
+      fft_output_buffer_[i][j] = std::polar(fft_output_buffer_[i][j].real(),
+                                            fft_output_buffer_[i][j].imag());
+    }
+  }
+
   // Inverse FFT.
   for (int i = 0; i < kNumChannels_; ++i) {
     ffts_[i]->Inverse(fft_output_buffer_[i], output_buffer_[i]);
@@ -82,7 +91,7 @@ void Vocoder::Synthesis() {
   // Apply window function.
   for (int i = 0; i < kNumChannels_; ++i) {
     for (int j = 0; j < kNumSamples_; ++j) {
-      output_buffer_[i][j] *= kWindowBuffer_[j];
+      output_buffer_[i][j] *= kWindowBuffer_[j] / kNumSamples_;
     }
   }
   // Overlap-add.
