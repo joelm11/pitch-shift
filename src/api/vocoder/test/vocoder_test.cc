@@ -100,9 +100,10 @@ TEST(VocoderTest2, ProcessSineWave) {
   const int kSampleRate = 48000;
   const int kNumChannels = 2;
   const int kTotalSamples = 96000;
-  const int kFrameSize = 1024;
+  const int kFrameSize = 256;
   const float kFrequency = 440.0f;  // A4 note
-  const float kAmplitude = 0.5f;
+  const float kAmplitude = 1.f;
+  const float kScaleFactor = 1.f;
 
   // Generate sine wave samples.
   std::vector<std::vector<float>> sine_wave(kNumChannels,
@@ -133,7 +134,7 @@ TEST(VocoderTest2, ProcessSineWave) {
       }
     }
 
-    auto processedChunk = vocoder.Process(curr_frame, 1.0f);
+    auto processedChunk = vocoder.Process(curr_frame, kScaleFactor);
 
     // Write processed samples to the output buffer.
     for (int channel = 0; channel < kNumChannels; ++channel) {

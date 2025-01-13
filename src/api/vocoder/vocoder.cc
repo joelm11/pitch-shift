@@ -15,7 +15,7 @@ std::vector<std::vector<float>> Vocoder::Process(
   ValidateAndUpdate(src, scale_factor);
   Analysis();
   // ModifyPhaseR();
-  // ModifyPhaseT
+  ModifyPhaseT();
   Synthesis();
 
   return output_buffer_;
@@ -71,6 +71,41 @@ void Vocoder::ModifyPhaseR() {
   for (int i = 0; i < kNumChannels_; ++i) {
     for (int j = 0; j < fft_output_buffer_.size(); ++j) {
       fft_output_buffer_[i][j].imag(0);
+    }
+  }
+}
+
+void Vocoder::ModifyPhaseT() {
+  std::vector<float> bin_freqs(kNumSamples_), phase_advance(kNumSamples_);
+  FBuffer inter_result(kNumChannels_, std::vector<float>(kNumSamples_));
+  // Constants.
+  for (int j = 0; j < kNumSamples_; ++j) {
+    bin_freqs[j] = 2 * M_PI * j / kNumSamples_;
+    phase_advance[j] = bin_freqs[j] * kAnalysisHopSize;
+  }
+  // Wrapped phase advance.
+  for (int i = 0; i < kNumChannels_; ++i) {
+    for (int j = 0; j < kNumSamples_; ++j) {
+      inter_result[i][j] = fft_output_buffer_[i][j].imag() - prev_phase_[i][j] -
+                           phase_advance[j];
+      inter_result[i][j] = inter_result[i][j] -
+                           2 * M_PI * round(inter_result[i][j] / (2 * M_PI));
+      prev_phase_[i][j] = fft_output_buffer_[i][j].imag();
+    }
+  }
+  // Instantaneous frequency.
+  for (int i = 0; i < kNumChannels_; ++i) {
+    for (int j = 0; j < kNumSamples_; ++j) {
+      inter_result[i][j] = bin_freqs[j] + inter_result[i][j] / kAnalysisHopSize;
+    }
+  }
+  // Phase propagation and synthesis.
+  for (int i = 0; i < kNumChannels_; ++i) {
+    for (int j = 0; j < kNumSamples_; ++j) {
+      inter_result[i][j] =
+          prev_synth_phase_[i][j] + synthesis_hop_size_ * inter_result[i][j];
+      fft_output_buffer_[i][j].imag(inter_result[i][j]);
+      prev_synth_phase_[i][j] = inter_result[i][j];
     }
   }
 }
