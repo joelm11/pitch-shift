@@ -12,17 +12,17 @@ Vocoder::Vocoder(const SizeType num_channels, const SizeType num_samples,
 
 std::vector<std::vector<float>> Vocoder::Process(
     const std::vector<std::vector<float>>& src, const float scale_factor) {
-  Validate(src, scale_factor);
+  ValidateAndUpdate(src, scale_factor);
   Analysis();
-  ModifyPhaseR();
+  // ModifyPhaseR();
   // ModifyPhaseT
   Synthesis();
 
   return output_buffer_;
 }
 
-void Vocoder::Validate(const std::vector<std::vector<float>>& src,
-                       const float scale_factor) {
+void Vocoder::ValidateAndUpdate(const std::vector<std::vector<float>>& src,
+                                const float scale_factor) {
   // If the channel count changes, throw an error.
   if (src.size() != kNumChannels_) {
     throw std::runtime_error("Vocoder: Channel count mismatch.");
