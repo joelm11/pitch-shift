@@ -15,10 +15,8 @@ std::vector<std::vector<float>> Vocoder::Process(
   ValidateAndUpdate(src, scale_factor);
   Analysis();
   // ModifyPhaseR();
-  ModifyPhaseT();
-  Synthesis();
-
-  return output_buffer_;
+  // ModifyPhaseT();
+  return Synthesis();
 }
 
 void Vocoder::ValidateAndUpdate(const std::vector<std::vector<float>>& src,
@@ -110,7 +108,7 @@ void Vocoder::ModifyPhaseT() {
   }
 }
 
-void Vocoder::Synthesis() {
+Vocoder::FBuffer Vocoder::Synthesis() {
   // Convert magnitude and phase back to complex format.
   for (int i = 0; i < kNumChannels_; ++i) {
     for (int j = 0; j < kNumSamples_; ++j) {
@@ -118,7 +116,6 @@ void Vocoder::Synthesis() {
                                             fft_output_buffer_[i][j].imag());
     }
   }
-
   // Inverse FFT.
   for (int i = 0; i < kNumChannels_; ++i) {
     ffts_[i]->Inverse(fft_output_buffer_[i], output_buffer_[i]);
@@ -130,9 +127,11 @@ void Vocoder::Synthesis() {
     }
   }
   // Overlap-add.
+  FBuffer output(kNumChannels_, std::vector<float>(synthesis_hop_size_));
   for (int i = 0; i < kNumChannels_; ++i) {
-    output_buffer_[i] = olabuffers_[i].OverlapAdd(output_buffer_[i]);
+    output[i] = olabuffers_[i].OverlapAdd(output_buffer_[i]);
   }
+  return output;
 }
 
 void Vocoder::InitBuffers(const SizeType num_channels,

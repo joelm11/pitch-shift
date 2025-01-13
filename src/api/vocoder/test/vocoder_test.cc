@@ -31,7 +31,7 @@ TEST_F(VocoderTest, Constructor) {
 TEST_F(VocoderTest, Process) {
   std::vector<std::vector<float>> out = vocoder->Process(src, scale_factor);
   EXPECT_EQ(out.size(), num_channels);
-  EXPECT_EQ(out[0].size(), num_samples);
+  EXPECT_EQ(out[0].size(), vocoder->GetOutputSize());
 }
 
 TEST_F(VocoderTest, RepeatProcess) {
@@ -40,7 +40,7 @@ TEST_F(VocoderTest, RepeatProcess) {
     out = vocoder->Process(src, scale_factor);
   }
   EXPECT_EQ(out.size(), num_channels);
-  EXPECT_EQ(out[0].size(), num_samples);
+  EXPECT_EQ(out[0].size(), vocoder->GetOutputSize());
 }
 
 TEST_F(VocoderTest, ChangingChannelCount) {
@@ -72,7 +72,7 @@ TEST(VocoderTest2, ProcessAudioFile) {
   output_file.setSampleRate(input_file.getSampleRate());
 
   // Process input file and write processed samples to output file.
-  for (int sampsProcd = 0; sampsProcd < kFileTotalSamples;
+  for (int sampsProcd = 0, out_samps_Procd = 0; sampsProcd < kFileTotalSamples;
        sampsProcd += kFrameSize) {
     // Copy samples from the input file to the current frame buffer.
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -82,15 +82,16 @@ TEST(VocoderTest2, ProcessAudioFile) {
       }
     }
 
-    auto processedChunk = vocoder.Process(curr_frame, 1.0f);
+    auto processedChunk = vocoder.Process(curr_frame, 1.f);
 
     // Write processed samples to the output file.
     for (int channel = 0; channel < kNumChannels; ++channel) {
-      for (int sample = 0; sample < kFrameSize; ++sample) {
-        output_file.samples[channel][sampsProcd + sample] =
+      for (int sample = 0; sample < vocoder.GetOutputSize(); ++sample) {
+        output_file.samples[channel][out_samps_Procd + sample] =
             processedChunk[channel][sample];
       }
     }
+    out_samps_Procd += vocoder.GetOutputSize();
   }
 
   ASSERT_TRUE(output_file.save("letrollface.wav"));

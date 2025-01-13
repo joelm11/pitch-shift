@@ -63,3 +63,17 @@ TEST(OLABufferTest, OverlapAdd4) {
               std::vector<float>({1.0f, 1.0f, 1.0f, 1.0f}));
   }
 }
+
+TEST(OLABufferTest, OverlapAdd8) {
+  const size_t window_size = 4;
+  const size_t hop_size = 8;
+  const std::vector<float> samples = {1.0f, 1.0f, 1.0f, 1.0f};
+  OLABuffer<float> buffer(window_size, hop_size);
+
+  EXPECT_EQ(buffer.OverlapAdd(samples),
+            std::vector<float>({1.0f, 1.0f, 1.0f, 1.0f, 0.f, 0.f, 0.f, 0.f}));
+  for (int i = 0; i < 10; ++i) {
+    EXPECT_EQ(buffer.OverlapAdd(samples),
+              std::vector<float>({1.0f, 1.0f, 1.0f, 1.0f, 0.f, 0.f, 0.f, 0.f}));
+  }
+}
