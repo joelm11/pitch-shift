@@ -1,52 +1,47 @@
-#ifndef API_VOCODER_OLA_BUFFER_H_
-#define API_VOCODER_OLA_BUFFER_H_
+#pragma once
 
-#include <algorithm>
-#include <iostream>
-#include <stdexcept>
+#include <cstddef>
 #include <vector>
 
+template <typename T>
 class OLABuffer {
  public:
-  OLABuffer(const size_t window_size, const size_t hop_size)
-      : kWindowSize_(window_size),
+  OLABuffer(const std::size_t frame_size, const std::size_t hop_size)
+      : kFrameSize_(frame_size),
         kHopSize_(hop_size),
-        kBufferSize_(2 * window_size),
-        buffer_(kBufferSize_, 0.0f),
-        index_(0) {}
+        kBufferSize_(kFrameSize_ + kHopSize_),
+        buffer_(kBufferSize_, 0),
+        l(0) {}
 
-  std::vector<float> OverlapAdd(const std::vector<float>& samples) {
-    if (samples.size() != kWindowSize_) {
-      throw std::runtime_error("Samples size must be equal to window size");
+  std::vector<T> OverlapAdd(const std::vector<T>& samples) {
+    if (samples.size() != kFrameSize_) {
+      //   throw std::runtime_error("Samples size must be equal to window
+      //   size");
     }
 
-    // Overlap add the samples to the buffer.
-    for (size_t i = 0; i < kWindowSize_; ++i) {
-      buffer_[index_ + i] += samples[i];
+    // Overlap add the samples to the ring buffer.
+    for (std::size_t i = 0; i < kFrameSize_; ++i) {
+      buffer_[(l + i) % kBufferSize_] += samples[i];
     }
-    index_ += kHopSize_;
 
     // Copy the output frame from the buffer.
-    const std::vector<float> kOutput(buffer_.begin(),
-                                     buffer_.begin() + kWindowSize_);
-
-    // If the index has moved beyond window size, we know we have a completed
-    // frame and should shift the buffer, clearing the portion of the buffer
-    // that does not contain a partially completed frame.
-    if (index_ >= kWindowSize_) {
-      std::memmove(buffer_.data(), buffer_.data() + kHopSize_,
-                   (kBufferSize_ - kHopSize_) * sizeof(float));
-      std::fill(buffer_.end() - kHopSize_, buffer_.end(), 0.0f);
-      index_ -= kHopSize_;
+    std::vector<T> output(kHopSize_);
+    for (std::size_t i = 0; i < kHopSize_; ++i) {
+      output[i] = buffer_[(l + i) % kBufferSize_];
     }
 
-    return kOutput;
+    // Zero out the portion of the buffer collected for output and update the
+    // write pointer.
+    for (std::size_t i = 0; i < kHopSize_; ++i) {
+      buffer_[(l + i) % kBufferSize_] = 0;
+    }
+    l = (l + kHopSize_) % kBufferSize_;
+
+    return output;
   }
 
  private:
-  const size_t kWindowSize_, kHopSize_, kBufferSize_;
-  std::vector<float> buffer_;
-  size_t index_;
+  const std::size_t kFrameSize_, kHopSize_, kBufferSize_;
+  std::vector<T> buffer_;
+  std::size_t l;
 };
-
-#endif  // API_VOCODER_OLA_BUFFER_H_

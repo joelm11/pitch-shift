@@ -42,7 +42,7 @@ class Vocoder {
   // NOTE: Using a vector of 1D FFTs for simplicity.
   // TODO: Update to use a multidimensional FFT implementation later.
   std::vector<std::unique_ptr<FFTImpl>> ffts_;
-  std::vector<OLABuffer> olabuffers_;
+  std::vector<OLABuffer<float>> olabuffers_;
   SizeType synthesis_hop_size_;
   float scale_factor_;
 };

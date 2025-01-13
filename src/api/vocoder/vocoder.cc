@@ -32,8 +32,8 @@ void Vocoder::ValidateAndUpdate(const std::vector<std::vector<float>>& src,
     scale_factor_ = scale_factor;
     synthesis_hop_size_ = kAnalysisHopSize * scale_factor_;
     // TODO: Make this a method that resets the buffer for the new hop-size.
-    olabuffers_ = std::vector<OLABuffer>(
-        kNumChannels_, OLABuffer(kNumSamples_, synthesis_hop_size_));
+    olabuffers_ = std::vector<OLABuffer<float>>(
+        kNumChannels_, OLABuffer<float>(kNumSamples_, synthesis_hop_size_));
   }
   // If the sample count changed, pad with zeros.
   if (src[0].size() < kNumSamples_) {
@@ -146,8 +146,8 @@ void Vocoder::InitBuffers(const SizeType num_channels,
   fft_input_buffer_ = FBuffer(num_channels, std::vector<float>(num_samples));
   fft_output_buffer_ =
       CFBuffer(num_channels, std::vector<std::complex<float>>(num_samples));
-  olabuffers_ = std::vector<OLABuffer>(
-      num_channels, OLABuffer(num_samples, synthesis_hop_size));
+  olabuffers_ = std::vector<OLABuffer<float>>(
+      num_channels, OLABuffer<float>(num_samples, synthesis_hop_size));
 };
 
 void Vocoder::InitFFT(const SizeType num_channels, const SizeType num_samples) {
