@@ -13,6 +13,12 @@ class Vocoder {
   using FBuffer = std::vector<std::vector<float>>;
   using CFBuffer = std::vector<std::vector<std::complex<float>>>;
 
+  enum Effect {
+    kNone = 0,
+    kRobotize = 1,
+    kTimeStretch = 2,
+  };
+
   Vocoder(SizeType num_channels, SizeType num_samples, SizeType sample_rate);
 
   /**
@@ -26,7 +32,8 @@ class Vocoder {
    * @return std::vector<std::vector<float>>
    */
   std::vector<std::vector<float>> Process(
-      const std::vector<std::vector<float>>& src, float scale_factor);
+      const std::vector<std::vector<float>>& src, const Effect effect,
+      const float scale_factor = 1.f);
 
   /**
    * @brief Returns the number of samples that will be available as output from
@@ -39,7 +46,7 @@ class Vocoder {
 
  private:
   void ValidateAndUpdate(const std::vector<std::vector<float>>& src,
-                         const float scale_factor);
+                         const Effect effect, const float scale_factor);
   void Analysis();
   void ModifyPhaseR();
   void ModifyPhaseT();
@@ -63,6 +70,7 @@ class Vocoder {
   std::vector<std::unique_ptr<FFTImpl>> ffts_;
   std::vector<OLABuffer<float>> olabuffers_;
   SizeType synthesis_hop_size_;
+  Effect curr_effect_;
   float scale_factor_;
 };
 
