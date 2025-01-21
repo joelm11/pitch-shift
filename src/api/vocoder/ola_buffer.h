@@ -15,8 +15,7 @@ class OLABuffer {
 
   std::vector<T> OverlapAdd(const std::vector<T>& samples) {
     if (samples.size() != kFrameSize_) {
-      //   throw std::runtime_error("Samples size must be equal to window
-      //   size");
+      throw std::runtime_error("Samples size must be equal to window size");
     }
 
     // Overlap add the samples to the ring buffer.
