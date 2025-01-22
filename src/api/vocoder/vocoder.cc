@@ -1,5 +1,6 @@
 #include "vocoder.h"
 
+#include <iostream>
 Vocoder::Vocoder(const SizeType num_channels, const SizeType num_samples,
                  const SizeType sample_rate)
     : kNumChannels_(num_channels),
@@ -10,6 +11,10 @@ Vocoder::Vocoder(const SizeType num_channels, const SizeType num_samples,
   InitFFT(num_channels, num_samples);
 }
 
+/** TODO: Currently the input is advancing by frame_size samples, when it should
+ * be advancing by analysis_hop_size samples. I still want to be able to feed it
+ * one frame at a time though.
+ */
 std::vector<std::vector<float>> Vocoder::Process(
     const std::vector<std::vector<float>>& src, const Effect effect,
     const float scale_factor) {
@@ -136,7 +141,8 @@ Vocoder::FBuffer Vocoder::Synthesis() {
   // Apply window function.
   for (int i = 0; i < kNumChannels_; ++i) {
     for (int j = 0; j < kNumSamples_; ++j) {
-      output_buffer_[i][j] *= kWindowBuffer_[j] / kNumSamples_;
+      // output_buffer_[i][j] *= kWindowBuffer_[j] / kNumSamples_;
+      output_buffer_[i][j] /= kNumSamples_;
     }
   }
   // Overlap-add.

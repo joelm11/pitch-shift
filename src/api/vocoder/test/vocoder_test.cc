@@ -75,7 +75,7 @@ TEST(VocoderTest2, ProcessAudioFile) {
 
   // Process input file and write processed samples to output file.
   for (int sampsProcd = 0, out_samps_Procd = 0; sampsProcd < kFileTotalSamples;
-       sampsProcd += kFrameSize) {
+       sampsProcd += vocoder.GetAnalysisHopSize()) {
     // Copy samples from the input file to the current frame buffer.
     for (int channel = 0; channel < kNumChannels; ++channel) {
       for (int sample = 0; sample < kFrameSize; ++sample) {
@@ -85,7 +85,7 @@ TEST(VocoderTest2, ProcessAudioFile) {
     }
 
     auto processedChunk =
-        vocoder.Process(curr_frame, Vocoder::kTimeStretch, 4.f);
+        vocoder.Process(curr_frame, Vocoder::kTimeStretch, 2.f);
 
     // Write processed samples to the output file.
     for (int channel = 0; channel < kNumChannels; ++channel) {

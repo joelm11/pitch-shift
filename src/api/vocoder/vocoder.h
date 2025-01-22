@@ -44,6 +44,14 @@ class Vocoder {
    */
   SizeType GetOutputSize() const { return synthesis_hop_size_; }
 
+  /**
+   * @brief Returns the number of samples expected between consecutive input
+   * frames.
+   *
+   * @return SizeType
+   */
+  SizeType GetAnalysisHopSize() const { return kAnalysisHopSize; }
+
  private:
   void ValidateAndUpdate(const std::vector<std::vector<float>>& src,
                          const Effect effect, const float scale_factor);
