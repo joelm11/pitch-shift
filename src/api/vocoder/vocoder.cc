@@ -54,8 +54,9 @@ void Vocoder::ValidateAndUpdate(const std::vector<std::vector<float>>& src,
   // If the sample count changed, pad with zeros.
   if (src[0].size() < kNumSamples_) {
     for (int i = 0; i < kNumChannels_; ++i) {
-      input_buffer_[i] = std::move(src[i]);
-      input_buffer_[i].resize(kNumSamples_, 0.0f);
+      std::copy(src[i].begin(), src[i].end(), input_buffer_[i].begin());
+      std::fill(input_buffer_[i].begin() + src[i].size(),
+                input_buffer_[i].end(), 0.0f);
     }
   } else {
     input_buffer_ = std::move(src);
