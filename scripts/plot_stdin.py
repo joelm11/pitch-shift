@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import matplotlib.pyplot as plt
 
@@ -8,8 +10,7 @@ def main():
             number = float(line.strip())
             numbers.append(number)
         except ValueError:
-            print(f"Invalid number: {line.strip()}", file=sys.stderr)
-            continue
+            continue  # Skip lines that are not purely numbers
 
     if not numbers:
         print("No valid numbers provided.", file=sys.stderr)
