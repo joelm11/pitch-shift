@@ -47,9 +47,9 @@ void Vocoder::ValidateAndUpdate(const std::vector<std::vector<float>>& src,
   if (scale_factor != scale_factor_) {
     scale_factor_ = scale_factor;
     synthesis_hop_size_ = kAnalysisHopSize * scale_factor_;
-    // TODO: Make this a method that resets the buffer for the new hop-size.
-    olabuffers_ = std::vector<OLABuffer<float>>(
-        kNumChannels_, OLABuffer<float>(kNumSamples_, synthesis_hop_size_));
+    for (auto& olabuffer : olabuffers_) {
+      olabuffer.SetHopSize(synthesis_hop_size_);
+    }
   }
   // If the sample count changed, pad with zeros.
   if (src[0].size() < kNumSamples_) {

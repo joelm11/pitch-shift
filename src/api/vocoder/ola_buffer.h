@@ -39,6 +39,8 @@ class OLABuffer {
     return output;
   }
 
+  void SetHopSize(const std::size_t hop_size) { kHopSize_ = hop_size; }
+
  private:
   const std::size_t kFrameSize_, kHopSize_, kBufferSize_;
   std::vector<T> buffer_;
