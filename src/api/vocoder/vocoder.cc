@@ -60,6 +60,7 @@ void Vocoder::ValidateAndUpdate(const std::vector<std::vector<float>>& src,
   } else {
     input_buffer_ = std::move(src);
   }
+  curr_effect_ = effect;
 }
 
 void Vocoder::Analysis() {
@@ -141,8 +142,7 @@ Vocoder::FBuffer Vocoder::Synthesis() {
   // Apply window function.
   for (int i = 0; i < kNumChannels_; ++i) {
     for (int j = 0; j < kNumSamples_; ++j) {
-      // output_buffer_[i][j] *= kWindowBuffer_[j] / kNumSamples_;
-      output_buffer_[i][j] /= kNumSamples_;
+      output_buffer_[i][j] *= kWindowBuffer_[j] / kNumSamples_;
     }
   }
   // Overlap-add.

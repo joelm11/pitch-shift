@@ -38,11 +38,11 @@ class Vocoder {
   /**
    * @brief Returns the number of samples that will be available as output from
    * the vocoder. The number of samples returned from the vocoder is
-   * proportional to the scale factor.
+   * proportional to the scale factor, which determines the synthesis hop size.
    *
    * @return SizeType
    */
-  SizeType GetOutputSize() const { return synthesis_hop_size_; }
+  SizeType GetSynthesisHopSize() const { return synthesis_hop_size_; }
 
   /**
    * @brief Returns the number of samples expected between consecutive input
