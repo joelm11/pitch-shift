@@ -8,10 +8,10 @@ class OLABuffer {
  public:
   OLABuffer(const std::size_t frame_size, const std::size_t hop_size)
       : kFrameSize_(frame_size),
-        kHopSize_(hop_size),
-        kBufferSize_(kFrameSize_ + kHopSize_),
-        buffer_(kBufferSize_, 0),
-        l(0) {}
+        kBufferSize_(kFrameSize_ + hop_size),
+        hop_size_(hop_size),
+        l_(0),
+        buffer_(kBufferSize_, 0) {}
 
   std::vector<T> OverlapAdd(const std::vector<T>& samples) {
     if (samples.size() != kFrameSize_) {
@@ -20,29 +20,29 @@ class OLABuffer {
 
     // Overlap add the samples to the ring buffer.
     for (std::size_t i = 0; i < kFrameSize_; ++i) {
-      buffer_[(l + i) % kBufferSize_] += samples[i];
+      buffer_[(l_ + i) % kBufferSize_] += samples[i];
     }
 
     // Copy the output frame from the buffer.
-    std::vector<T> output(kHopSize_);
-    for (std::size_t i = 0; i < kHopSize_; ++i) {
-      output[i] = buffer_[(l + i) % kBufferSize_];
+    std::vector<T> output(hop_size_);
+    for (std::size_t i = 0; i < hop_size_; ++i) {
+      output[i] = buffer_[(l_ + i) % kBufferSize_];
     }
 
     // Zero out the portion of the buffer collected for output and update the
     // write pointer.
-    for (std::size_t i = 0; i < kHopSize_; ++i) {
-      buffer_[(l + i) % kBufferSize_] = 0;
+    for (std::size_t i = 0; i < hop_size_; ++i) {
+      buffer_[(l_ + i) % kBufferSize_] = 0;
     }
-    l = (l + kHopSize_) % kBufferSize_;
+    l_ = (l_ + hop_size_) % kBufferSize_;
 
     return output;
   }
 
-  void SetHopSize(const std::size_t hop_size) { kHopSize_ = hop_size; }
+  void SetHopSize(const std::size_t hop_size) { hop_size_ = hop_size; }
 
  private:
-  const std::size_t kFrameSize_, kHopSize_, kBufferSize_;
+  const std::size_t kFrameSize_, kBufferSize_;
+  std::size_t hop_size_, l_;
   std::vector<T> buffer_;
-  std::size_t l;
 };

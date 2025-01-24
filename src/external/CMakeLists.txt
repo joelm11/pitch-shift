@@ -7,3 +7,6 @@ add_subdirectory(kissfft)
 set(BUILD_EXAMPLES OFF)
 set(BUILD_TESTS OFF)
 add_subdirectory(AudioFile)
+
+# Resampling implementation
+add_subdirectory(speex_resampler)
