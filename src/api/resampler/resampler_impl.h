@@ -1,4 +1,0 @@
-#ifndef RESAMPLER_RESAMPLER_IMPL_H_
-#define RESAMPLER_RESAMPLER_IMPL_H_
-
-#endif
