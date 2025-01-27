@@ -24,13 +24,12 @@ TEST(ResamplerTest, ResampleSine) {
   EXPECT_EQ(output[0].size(),
             std::floor(num_samples * (float)out_rate / in_rate));
 
-  // Check that the output has the expected frequency.
-  // The output frequency is 480Hz, which is 440Hz resampled from 44.1kHz to
-  // 48kHz.
+  // Check that the output has the expected frequency (440Hz).
+  // Only check the first half of the output samples as some zeros are added at
+  // the end.
   const float kTolerance = 0.1f;
-  for (int i = 0; i < output[0].size(); ++i) {
-    // float expected = 0.5f * sinf(2 * M_PI * 440 * i / out_rate);
-    // EXPECT_NEAR(output[0][i], expected, kTolerance);
-    printf("%f\n", output[0][i]);
+  for (int i = 0; i < output[0].size() / 2; ++i) {
+    float expected = 0.5f * sinf(2 * M_PI * 440 * i / out_rate);
+    EXPECT_NEAR(output[0][i], expected, kTolerance);
   }
 }

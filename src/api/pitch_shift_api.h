@@ -5,8 +5,8 @@
 #include <memory>
 #include <vector>
 
-// #include "resampler/resampler.h"
-#include "vocoder/vocoder.h"
+class Vocoder;
+class Resampler;
 
 class PitchShifter {
  public:
@@ -24,8 +24,8 @@ class PitchShifter {
   const SizeType kNumChannels;
   const SizeType kNumSamples;
   const SizeType kSampleRate;
-  Vocoder vocoder_;
-  // Resampler<float> resampler_;
+  std::unique_ptr<Vocoder> vocoder_;
+  std::unique_ptr<Resampler> resampler_;
 };
 
 #endif  // PITCH_SHIFT_API_H_

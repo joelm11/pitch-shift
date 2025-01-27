@@ -6,7 +6,7 @@ add_subdirectory(resampler)
 target_link_libraries(pitch-shift-api 
     PRIVATE
         vocoder
-        # resampler
+        resampler
 )
 
 # Build unit tests if in debug mode.
