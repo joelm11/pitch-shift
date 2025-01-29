@@ -19,23 +19,20 @@ PitchShifter::PitchShifter(const SizeType num_channels,
 
 PitchShifter::~PitchShifter() {}
 
-std::vector<std::vector<float>> static ProcessInputSamples(
+void PitchShifter::ProcessInputSamples(
     const std::vector<std::vector<float>>& src) {
   // Initially we start with an empty buffer of size 4 * frame_size.
   // Each time we receive a new frame, we left shift the buffer by frame_size
   // and append the new frame at the end of the buffer.
   const int kFrameSize = 256;
-  std::vector<std::vector<float>> buffer(src.size(),
-                                         std::vector<float>(4 * kFrameSize));
   for (int i = 0; i < src.size(); ++i) {
     // Using memcpy, left-shift buffer.
-    std::memcpy(buffer[i].data(), buffer[i].data() + kFrameSize,
+    std::memcpy(input_buffer_[i].data(), input_buffer_[i].data() + kFrameSize,
                 3 * kFrameSize * sizeof(float));
     // Append new frame at the end of the buffer.
-    std::memcpy(buffer[i].data() + 3 * kFrameSize, src[i].data(),
+    std::memcpy(input_buffer_[i].data() + 3 * kFrameSize, src[i].data(),
                 kFrameSize * sizeof(float));
   }
-  return buffer;
 }
 
 std::vector<std::vector<float>> PitchShifter::ScaleTime(
@@ -45,14 +42,18 @@ std::vector<std::vector<float>> PitchShifter::ScaleTime(
     throw std::runtime_error("Debug: Frame size must be 256 for now.");
   }
 
-  input_buffer_ = ProcessInputSamples(src);
+  ProcessInputSamples(src);
   return vocoder_->Process(input_buffer_, Vocoder::kTimeStretch, scale_factor);
 }
 
 std::vector<std::vector<float>> PitchShifter::ScalePitch(
     const std::vector<std::vector<float>>& src, const float scale_factor) {
-  resampler_->SetRate(kSampleRate * scale_factor);
-  input_buffer_ = ProcessInputSamples(src);
+  resampler_->SetRate(kSampleRate, kSampleRate * 1.f / scale_factor);
+  resampler_->SetInOutSamples(vocoder_->GetAnalysisHopSize(), kFrameSize);
+  ProcessInputSamples(src);
   return resampler_->Resample(
       vocoder_->Process(input_buffer_, Vocoder::kTimeStretch, scale_factor));
 }
+
+// Vocoder input is 256 samples. Vocoder output is 386 samples. We want this
+// resampled back to 256 samples.

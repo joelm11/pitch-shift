@@ -22,6 +22,8 @@ class PitchShifter {
       const std::vector<std::vector<float>>& src, float scale_factor);
 
  private:
+  void ProcessInputSamples(const std::vector<std::vector<float>>& src);
+
   const SizeType kFrameSize = 256;
   const SizeType kNumChannels;
   const SizeType kSampleRate;
