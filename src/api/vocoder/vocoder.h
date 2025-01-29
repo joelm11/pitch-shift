@@ -23,8 +23,9 @@ class Vocoder {
 
   /**
    * @brief Given a frame of audio samples, process the frame using the vocoder.
-   * As the vocoder uses overlap-add to reconstruct the signal, GetOutputSize()
-   * samples will be available as output from each iteration.
+   * As the vocoder uses overlap-add to reconstruct the signal,
+   * GetAnalysisHopSize() samples will be available as output from each
+   * iteration.
    * TODO: Add the ability to shift out the remaining processed samples when
    * the input is finished.
    * @param src

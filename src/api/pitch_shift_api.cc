@@ -17,6 +17,27 @@ PitchShifter::PitchShifter(const SizeType num_channels,
   input_buffer_.resize(num_channels, std::vector<float>(4 * kFrameSize, 0.f));
 }
 
+PitchShifter::~PitchShifter() {}
+
+std::vector<std::vector<float>> static ProcessInputSamples(
+    const std::vector<std::vector<float>>& src) {
+  // Initially we start with an empty buffer of size 4 * frame_size.
+  // Each time we receive a new frame, we left shift the buffer by frame_size
+  // and append the new frame at the end of the buffer.
+  const int kFrameSize = 256;
+  std::vector<std::vector<float>> buffer(src.size(),
+                                         std::vector<float>(4 * kFrameSize));
+  for (int i = 0; i < src.size(); ++i) {
+    // Using memcpy, left-shift buffer.
+    std::memcpy(buffer[i].data(), buffer[i].data() + kFrameSize,
+                3 * kFrameSize * sizeof(float));
+    // Append new frame at the end of the buffer.
+    std::memcpy(buffer[i].data() + 3 * kFrameSize, src[i].data(),
+                kFrameSize * sizeof(float));
+  }
+  return buffer;
+}
+
 std::vector<std::vector<float>> PitchShifter::ScaleTime(
     const std::vector<std::vector<float>>& src, const float scale_factor) {
   // During development let's only allow a frame size of 256.
@@ -24,21 +45,14 @@ std::vector<std::vector<float>> PitchShifter::ScaleTime(
     throw std::runtime_error("Debug: Frame size must be 256 for now.");
   }
 
-  // Initially we start with an empty buffer of size 4 * frame_size.
-  // Each time we receive a new frame, we left shift the buffer by frame_size
-  // and append the new frame at the end of the buffer.
-  for (SizeType i = 0; i < kNumChannels; ++i) {
-    std::copy(input_buffer_[i].begin() + kFrameSize, input_buffer_[i].end(),
-              input_buffer_[i].begin());
-    std::copy(src[i].begin(), src[i].end(),
-              input_buffer_[i].begin() + 3 * kFrameSize);
-  }
+  input_buffer_ = ProcessInputSamples(src);
   return vocoder_->Process(input_buffer_, Vocoder::kTimeStretch, scale_factor);
 }
 
 std::vector<std::vector<float>> PitchShifter::ScalePitch(
     const std::vector<std::vector<float>>& src, const float scale_factor) {
   resampler_->SetRate(kSampleRate * scale_factor);
+  input_buffer_ = ProcessInputSamples(src);
   return resampler_->Resample(
-      vocoder_->Process(src, Vocoder::kNone, scale_factor));
+      vocoder_->Process(input_buffer_, Vocoder::kTimeStretch, scale_factor));
 }

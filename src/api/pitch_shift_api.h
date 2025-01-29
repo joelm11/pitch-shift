@@ -14,6 +14,8 @@ class PitchShifter {
 
   PitchShifter(SizeType num_channels, SizeType sample_rate);
 
+  ~PitchShifter();
+
   std::vector<std::vector<float>> ScaleTime(
       const std::vector<std::vector<float>>& src, float scale_factor);
   std::vector<std::vector<float>> ScalePitch(
