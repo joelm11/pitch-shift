@@ -12,8 +12,8 @@ PitchShifter::PitchShifter(const SizeType num_channels,
       kSampleRate(sample_rate),
       vocoder_(
           std::make_unique<Vocoder>(num_channels, 4 * kFrameSize, sample_rate)),
-      resampler_(std::make_unique<Resampler>(48e3, 48e3, num_channels,
-                                             4 * kFrameSize)) {
+      resampler_(
+          std::make_unique<Resampler>(48e3, 48e3, num_channels, kFrameSize)) {
   input_buffer_.resize(num_channels, std::vector<float>(4 * kFrameSize, 0.f));
 }
 
@@ -49,11 +49,8 @@ std::vector<std::vector<float>> PitchShifter::ScaleTime(
 std::vector<std::vector<float>> PitchShifter::ScalePitch(
     const std::vector<std::vector<float>>& src, const float scale_factor) {
   resampler_->SetRate(kSampleRate, kSampleRate * 1.f / scale_factor);
-  resampler_->SetInOutSamples(vocoder_->GetAnalysisHopSize(), kFrameSize);
+  resampler_->SetInOutSamples(vocoder_->GetSynthesisHopSize(), kFrameSize);
   ProcessInputSamples(src);
   return resampler_->Resample(
       vocoder_->Process(input_buffer_, Vocoder::kTimeStretch, scale_factor));
 }
-
-// Vocoder input is 256 samples. Vocoder output is 386 samples. We want this
-// resampled back to 256 samples.

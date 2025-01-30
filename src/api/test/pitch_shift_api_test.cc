@@ -87,6 +87,8 @@ TEST(PitchShiftApiTest, PitchShift) {
 
     auto processedChunk = shifter.ScalePitch(curr_frame, kScaleFactor);
 
+    EXPECT_EQ(processedChunk[0].size(), kFrameSize);
+
     // Write processed samples to the output file.
     for (int channel = 0; channel < kNumChannels; ++channel) {
       for (int sample = 0; sample < processedChunk.back().size(); ++sample) {
