@@ -34,6 +34,7 @@ endif()
 
 add_subdirectory(src/external)
 add_subdirectory(src/api)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS pitch-shift-api)
 
 # Conditionally build CLI.
 # ...

@@ -18,6 +18,7 @@ class PitchShifter {
 
   std::vector<std::vector<float>> ScaleTime(
       const std::vector<std::vector<float>>& src, float scale_factor);
+      
   std::vector<std::vector<float>> ScalePitch(
       const std::vector<std::vector<float>>& src, float scale_factor);
 
