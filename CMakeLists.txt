@@ -34,7 +34,7 @@ endif()
 
 add_subdirectory(src/external)
 add_subdirectory(src/api)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS pitch-shift-api)
 
-# Conditionally build CLI.
-# ...
+# include GNU install tools.
+# include(GNUInstallDirs)
+# Set CMAKE_INSTALL_PREFIX to wherever the user sets. It has a reasonable default.
