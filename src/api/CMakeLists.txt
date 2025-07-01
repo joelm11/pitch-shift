@@ -4,8 +4,8 @@ add_subdirectory(vocoder)
 add_subdirectory(resampler)
 
 target_link_libraries(pitch-shift-api PUBLIC vocoder resampler)
+target_include_directories(pitch-shift-api PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
-# Build unit tests if in debug mode.
-if(DEBUG)
+if(STANDALONE_BUILD AND DEBUG)
     add_subdirectory(test)
 endif()
