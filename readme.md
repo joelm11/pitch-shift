@@ -62,6 +62,14 @@ for (const auto& frame : input_file.samples) {
 
 ```
 
+#### Building the API
+
+This project is meant to be consumed by CMake as a subdirectory after being cloned or added as a submodule e.g./
+```
+add_subdirectory(<path_to_pitch-shift>)
+target_link_libraries(my_app PUBLIC pitch-shift-api)
+```
+
 ## Dependencies
 
 - [AudioFile](https://github.com/adamstark/AudioFile) (for reading/writing WAV files)
@@ -70,11 +78,3 @@ for (const auto& frame : input_file.samples) {
 - [Speex Resampler](https://github.com/xiph/speexdsp) (for resampling)
 
 All dependencies are automatically downloaded and built by CMake. No manual installation is required.
-
-## Contributing
-
-Contributions are welcome! Please open issues or pull requests on GitHub.
-
-## License
-
-[MIT License](LICENSE)
